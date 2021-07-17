@@ -14,6 +14,7 @@ import seaborn as sns
 import subprocess
 import sys
 import timeit
+import time
 from itertools import repeat
 from multiprocessing import Pool
 from tabulate import tabulate
@@ -49,7 +50,7 @@ def run_task(argv):
     parser.add_argument('-n', '--number', help='integer value', type=int, default=0)
     parser.add_argument('positional', metavar='p', type=str, nargs='*')
     args = parser.parse_args(argv[1:])
-    
+
     # Todo: Change to expected output file.
     run(f'mkdir -p {OUTPUT_DIR}', False)
     output_file = f"{OUTPUT_DIR}/run_{args.number}.txt"
@@ -59,3 +60,4 @@ def run_task(argv):
 
 if __name__ == '__main__':
     run_task(sys.argv)
+

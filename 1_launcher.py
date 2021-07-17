@@ -25,6 +25,7 @@ import seaborn as sns
 import subprocess
 import sys
 import timeit
+import tqdm
 from itertools import repeat
 from multiprocessing import Pool
 from tabulate import tabulate
@@ -32,6 +33,28 @@ from pprint import pprint
 
 # Import the single script.
 single = importlib.import_module('0_single')
+
+
+# From https://stackoverflow.com/questions/57354700/starmap-combined-with-tqdm
+def istarmap(self, func, iterable, chunksize=1):
+    """starmap-version of imap
+    """
+    self._check_running()
+    if chunksize < 1:
+        raise ValueError(
+            "Chunksize must be 1+, not {0:n}".format(
+                chunksize))
+
+    task_batches = mpp.Pool._get_tasks(func, iterable, chunksize)
+    result = mpp.IMapIterator(self)
+    self._taskqueue.put(
+        (
+            self._guarded_task_generation(result._job,
+                                          mpp.starmapstar,
+                                          task_batches),
+            result._set_length
+        ))
+    return (item for chunk in result for item in chunk)
 
 
 def run(command):
@@ -62,8 +85,9 @@ def main(argv):
 
     # Run jobs using single.run_task
     try:
-        with Pool(8) as p:
-            p.map(single.run_task, jobs)
+        with Pool(JOBS) as p:
+            for _ in tqdm.tqdm(p.imap(single.run_task, jobs), total=len(jobs)):
+                pass
 
         print('Done')
         send_mail("Data Collection Completed", os.getcwd())

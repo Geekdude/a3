@@ -1,0 +1,3 @@
+[submodule "datastore"]
+	path = datastore
+	url = git@bitbucket.org:Geekdude/datastore.git
