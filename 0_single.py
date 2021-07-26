@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+A3: https://github.com/Geekdude/a3
+Author: Aaron Young
+
+Script to launch a single task.
+"""
 
 import importlib
 import argparse
@@ -23,14 +29,32 @@ from pprint import pprint
 # Todo: update output directory
 OUTPUT_DIR = 'out'
 
-def run(command, verbose=True):
-    """Print command then run command"""
 
+def run(command, verbose=True, noop=False):
+    """Print command then run command"""
     if verbose:
         print(command)
-    return_val = subprocess.check_output(command, shell=True).decode()
-    if verbose and return_val:
-        print(return_val)
+    if not noop:
+        return_val = subprocess.check_output(command, shell=True).decode()
+        if verbose and return_val:
+            print(return_val)
+        return return_val
+
+
+def shell_source(script):
+    """Sometime you want to emulate the action of "source" in bash,
+    settings some environment variables. Here is a way to do it."""
+    import subprocess, os
+    pipe = subprocess.Popen("bash -c 'source %s > /dev/null; env'" % script, stdout=subprocess.PIPE, shell=True)
+    output = pipe.communicate()[0].decode()
+    env = {}
+    for line in output.splitlines():
+        try:
+            key, val = line.split("=", 1)
+        except ValueError as e:
+            pass
+        env[key] = val
+    os.environ.update(env)
 
 
 def execute(output_file, *args, **kwargs):

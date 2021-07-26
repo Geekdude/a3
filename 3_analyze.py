@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
+"""
+A3: https://github.com/Geekdude/a3
+Author: Aaron Young
 
-"""Analyze and plot results."""
+Script to analyze and plot results.
+"""
 
 import argparse
 import sys

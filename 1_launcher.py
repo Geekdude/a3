@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+A3: https://github.com/Geekdude/a3
 Author: Aaron Young
 
 Script to launch multiple single tasks.
@@ -30,9 +31,22 @@ from itertools import repeat
 from multiprocessing import Pool
 from tabulate import tabulate
 from pprint import pprint
+from contextlib import contextmanager
 
 # Import the single script.
 single = importlib.import_module('0_single')
+
+
+# From https://stackoverflow.com/questions/2125702/how-to-suppress-console-output-in-python
+@contextmanager
+def suppress_stdout():
+    with open(os.devnull, "w") as devnull:
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        try:  
+            yield
+        finally:
+            sys.stdout = old_stdout
 
 
 # From https://stackoverflow.com/questions/57354700/starmap-combined-with-tqdm
@@ -57,12 +71,20 @@ def istarmap(self, func, iterable, chunksize=1):
     return (item for chunk in result for item in chunk)
 
 
-def run(command):
+def run(command, verbose=True, noop=False):
     """Print command then run command"""
-    print(command)
-    return_val = subprocess.check_output(command, shell=True).decode()
-    if return_val:
-        print(return_val)
+    if verbose:
+        print(command)
+    if not noop:
+        return_val = subprocess.check_output(command, shell=True).decode()
+        if verbose and return_val:
+            print(return_val)
+        return return_val
+
+
+def single_no_stdout(job):
+    with suppress_stdout():
+        single.run_task(job)
 
 
 def send_mail(subject, body):
@@ -80,21 +102,24 @@ def main(argv):
         f'-n 2 third function'
     ]
 
+    print('Running Jobs:')
+    pprint(jobs)
+
     # Convert string into args
     jobs = [[''] + i.split() for i in jobs]
 
     # Run jobs using single.run_task
     try:
         with Pool(JOBS) as p:
-            for _ in tqdm.tqdm(p.imap(single.run_task, jobs), total=len(jobs)):
+            for _ in tqdm.tqdm(p.imap(single_no_stdout, jobs), total=len(jobs)):
                 pass
 
-        print('Done')
         send_mail("Data Collection Completed", os.getcwd())
+        print('Done')
 
     except Exception as e:
-        print('Error', file=sys.stderr)
         send_mail("Data Collection Error", f'{os.getcwd()}: {e}')
+        print('Error', file=sys.stderr)
         raise e
 
 

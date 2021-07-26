@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+A3: https://github.com/Geekdude/a3
+Author: Aaron Young
+
+Script to collect results from a run.
+"""
 
 import argparse
 import datastore
