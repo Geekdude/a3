@@ -72,12 +72,13 @@ def run_task(argv):
     # Todo: Change the parser to expose the single task variables.
     parser = argparse.ArgumentParser(description="""Description""")
     parser.add_argument('-n', '--number', help='integer value', type=int, default=0)
+    parser.add_argument('-d', '--dir', type=str, default=OUTPUT_DIR)
     parser.add_argument('positional', metavar='p', type=str, nargs='*')
     args = parser.parse_args(argv[1:])
 
     # Todo: Change to expected output file.
-    run(f'mkdir -p {OUTPUT_DIR}', False)
-    output_file = f"{OUTPUT_DIR}/run_{args.number}.txt"
+    run(f'mkdir -p {args.dir}', False)
+    output_file = f"{args.dir}/run_{args.number}.txt"
 
     datastore.execute_if_missing(output_file, execute, output_file, *args.positional, **vars(args))
 
