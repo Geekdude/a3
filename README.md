@@ -10,7 +10,7 @@ The pieces of the automation are shown in this diagram.
 
 Before using, install included datastore python package.
 
-See requirements for additional requirements. They can be installed with 
+See `requirements.txt` for additional requirements. They can be installed with 
 
 ```bash
 pip install -r requirements.txt
