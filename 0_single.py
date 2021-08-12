@@ -65,15 +65,17 @@ def execute(output_file, *args, **kwargs):
     with open(output_file, 'w') as fd:
         fd.write(f"Running Task args:{args} kwargs:{kwargs}")
 
+def InitParser(parser):
+    # Todo: Change the parser to expose the single task variables.
+    parser.add_argument('-n', '--number', help='integer value', type=int, default=0)
+    parser.add_argument('-d', '--dir', type=str, default=OUTPUT_DIR)
+    parser.add_argument('positional', metavar='p', type=str, nargs='*')
 
 def run_task(argv):
     """Parse the arguments and call execute."""
     # Parse the arguments
-    # Todo: Change the parser to expose the single task variables.
     parser = argparse.ArgumentParser(description="""Description""")
-    parser.add_argument('-n', '--number', help='integer value', type=int, default=0)
-    parser.add_argument('-d', '--dir', type=str, default=OUTPUT_DIR)
-    parser.add_argument('positional', metavar='p', type=str, nargs='*')
+    InitParser(parser)
     args = parser.parse_args(argv[1:])
 
     # Todo: Change to expected output file.
