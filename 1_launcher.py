@@ -73,13 +73,29 @@ def istarmap(self, func, iterable, chunksize=1):
 
 def run(command, verbose=True, noop=False):
     """Print command then run command"""
+    return_val = ''
+
     if verbose:
         print(command)
     if not noop:
-        return_val = subprocess.check_output(command, shell=True).decode()
+        try:
+            return_val = subprocess.check_output(command, shell=True, stderr=subprocess.PIPE).decode()
+        except subprocess.CalledProcessError as e:
+            err_mesg = f'{os.getcwd()}: {e}\n\n{traceback.format_exc()}\n\n{e.returncode}\n\n{e.stdout.decode()}\n\n{e.stderr.decode()}'
+            print(err_mesg, file=sys.stderr)
+            with open('err.txt', 'w') as fd:
+                fd.write(err_mesg)
+            raise e
+        except Exception as e:
+            err_mesg = f'{os.getcwd()}: {e}\n\n{traceback.format_exc()}'
+            print(err_mesg, file=sys.stderr)
+            with open('err.txt', 'w') as fd:
+                fd.write(err_mesg)
+            raise e
         if verbose and return_val:
             print(return_val)
-        return return_val
+
+    return return_val
 
 
 def single_no_stdout(job):

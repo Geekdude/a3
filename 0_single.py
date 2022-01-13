@@ -21,6 +21,7 @@ import subprocess
 import sys
 import timeit
 import time
+import traceback
 from itertools import repeat
 from multiprocessing import Pool
 from tabulate import tabulate
@@ -28,17 +29,34 @@ from pprint import pprint
 
 # Todo: update output directory
 OUTPUT_DIR = 'out'
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 def run(command, verbose=True, noop=False):
     """Print command then run command"""
+    return_val = ''
+
     if verbose:
         print(command)
     if not noop:
-        return_val = subprocess.check_output(command, shell=True).decode()
+        try:
+            return_val = subprocess.check_output(command, shell=True, stderr=subprocess.PIPE).decode()
+        except subprocess.CalledProcessError as e:
+            err_mesg = f'{os.getcwd()}: {e}\n\n{traceback.format_exc()}\n\n{e.returncode}\n\n{e.stdout.decode()}\n\n{e.stderr.decode()}'
+            print(err_mesg, file=sys.stderr)
+            with open('err.txt', 'w') as fd:
+                fd.write(err_mesg)
+            raise e
+        except Exception as e:
+            err_mesg = f'{os.getcwd()}: {e}\n\n{traceback.format_exc()}'
+            print(err_mesg, file=sys.stderr)
+            with open('err.txt', 'w') as fd:
+                fd.write(err_mesg)
+            raise e
         if verbose and return_val:
             print(return_val)
-        return return_val
+
+    return return_val
 
 
 def shell_source(script):
