@@ -59,6 +59,9 @@ def run(command, verbose=True, noop=False):
     return return_val
 
 
+# GIT_ROOT = run('git rev-parse --show-toplevel', False).strip()
+
+
 def shell_source(script):
     """Sometime you want to emulate the action of "source" in bash,
     settings some environment variables. Here is a way to do it."""
@@ -80,13 +83,21 @@ def execute(output_file, *args, **kwargs):
     # Todo: This function is overwritten with the desired behavior.
 
     print(f"Running Task args:{args} kwargs:{kwargs}")
-    with open(output_file, 'w') as fd:
-        fd.write(f"Running Task args:{args} kwargs:{kwargs}")
+
+    time.sleep(5)
+
+    print('Done Running')
+
+    if not kwargs['noop']:
+        with open(output_file, 'w') as fd:
+            fd.write(f"Running Task args:{args} kwargs:{kwargs}")
 
 def InitParser(parser):
     # Todo: Change the parser to expose the single task variables.
     parser.add_argument('-n', '--number', help='integer value', type=int, default=0)
+    parser.add_argument('--noop', action='store_true', help='Print jobs, but do no run')
     parser.add_argument('-d', '--dir', type=str, default=OUTPUT_DIR)
+    parser.add_argument('-t', '--threads', type=int, help='Threads to use for job', default=1)
     parser.add_argument('positional', metavar='p', type=str, nargs='*')
 
 def run_task(argv):
@@ -97,7 +108,7 @@ def run_task(argv):
     args = parser.parse_args(argv[1:])
 
     # Todo: Change to expected output file.
-    run(f'mkdir -p {args.dir}', False)
+    run(f'mkdir -p {args.dir}', False, noop=args.noop)
     output_file = f"{args.dir}/run_{args.number}.txt"
 
     datastore.execute_if_missing(output_file, execute, output_file, *args.positional, **vars(args))
